@@ -1,0 +1,50 @@
+# FastAPI ve ilgili kütüphaneler
+fastapi==0.104.1
+uvicorn==0.24.0
+pydantic==2.4.2
+pydantic-settings==2.0.3
+python-multipart==0.0.6
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# Veritabanı
+sqlalchemy==2.0.23
+alembic==1.12.1
+asyncpg==0.29.0
+psycopg2-binary==2.9.9
+redis==5.0.1
+
+# API iletişimi
+httpx==0.25.1
+websockets==12.0
+aiohttp==3.8.6
+requests==2.31.0
+
+# Teknik analiz
+numpy==1.26.1
+pandas==2.1.3
+ta==0.11.0  # Teknik analiz kütüphanesi
+pandas-ta==0.3.14b0  # Pandas için teknik analiz eklentisi
+
+# AI entegrasyonu
+openai==1.3.0
+tiktoken==0.5.1  # OpenAI token sayımı için
+
+# Grafikler ve görselleştirme
+matplotlib==3.8.1
+plotly==5.18.0
+
+# Performans ve izleme
+prometheus-client==0.17.1
+sentry-sdk==1.34.0
+
+# Geliştirme araçları
+pytest==7.4.3
+pytest-asyncio==0.21.1
+black==23.10.1
+isort==5.12.0
+mypy==1.6.1
+flake8==6.1.0
+
+# Binance API
+python-binance==1.0.19 

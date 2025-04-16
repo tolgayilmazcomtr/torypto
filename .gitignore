@@ -1,0 +1,80 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+.env
+.venv
+venv/
+
+# Node.js / Next.js
+node_modules/
+.next/
+out/
+.DS_Store
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.vercel
+.turbo
+.env*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+.history/
+
+# Docker
+.docker/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependency directories
+jspm_packages/
+
+# Database
+*.sqlite
+*.db
+
+# Misc
+.coverage
+htmlcov/
+.pytest_cache/
+coverage/
+.coverage.*
+coverage.xml
+*.cover
+.hypothesis/
+.ipynb_checkpoints
+.jython_cache/
+.mypy_cache/
+.nox/
+.sage.py
+.spyderproject
+.spyproject
+.tox/
+nosetests.xml 
