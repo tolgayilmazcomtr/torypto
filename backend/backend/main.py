@@ -16,7 +16,25 @@ logging.basicConfig(
 logger = logging.getLogger("torypto")
 
 # Uygulamanın kök dizinini Python yoluna ekle
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+# API router'ları
+try:
+    logger.info("Router'ları yüklemeye başlıyor...")
+    from backend.api.routes.auth import router as auth_router
+    logger.info("Auth router yüklendi.")
+    from backend.api.routes.users import router as users_router
+    logger.info("Users router yüklendi.")
+    from backend.api.routes.crypto import router as crypto_router
+    logger.info("Crypto router yüklendi.")
+    from backend.api.routes.symbols import router as symbols_router
+    logger.info("Symbols router yüklendi.")
+    routers_imported = True
+except ImportError as e:
+    logger.error(f"Router import hatası: {str(e)}")
+    import traceback
+    logger.error(f"Tam hata: {traceback.format_exc()}")
+    routers_imported = False
 
 # FastAPI uygulaması
 app = FastAPI(
@@ -55,63 +73,26 @@ async def global_exception_handler(request: Request, exc: Exception):
         content={"detail": "Sunucu hatası", "error": str(exc)}
     )
 
-# Router'ları içe aktar ve ekle
-try:
-    # API rotalarını dene
+# Router'ları ekle
+if routers_imported:
     try:
-        from app.api.routes.auth import router as auth_router
         app.include_router(auth_router)
-        logger.info("Auth router başarıyla eklendi")
-    except ImportError as e:
-        logger.warning(f"Auth router import edilemedi: {str(e)}")
-    
-    try:
-        from app.api.routes.users import router as users_router
-        app.include_router(users_router)
-        logger.info("Users router başarıyla eklendi")
-    except ImportError as e:
-        logger.warning(f"Users router import edilemedi: {str(e)}")
-    
-    # API ve app rotalarının her ikisini de ekleyeceğiz
-    # İlk olarak API rotasını dene (prefix: /api/crypto)
-    try:
-        from app.api.routes.crypto import router as api_crypto_router
-        app.include_router(api_crypto_router)
-        logger.info("API Crypto router başarıyla eklendi")
-    except ImportError as e:
-        logger.warning(f"API Crypto router import edilemedi: {str(e)}")
-    
-    # İkinci olarak app rotasını dene (prefix: /crypto)
-    try:
-        from app.routers.crypto import router as app_crypto_router
-        app.include_router(app_crypto_router)
-        logger.info("App Crypto router başarıyla eklendi")
-    except ImportError as e:
-        logger.warning(f"App Crypto router import edilemedi: {str(e)}")
-    
-    # Sembol rotalarını dene
-    try:
-        from app.routers.symbols import router as symbols_router
-        app.include_router(symbols_router)
-        logger.info("Symbol router başarıyla eklendi")
-    except ImportError as e:
-        logger.warning(f"Symbol router import edilemedi: {str(e)}")
-        # Alternatif konumu dene
-        try:
-            from app.api.routes.symbols import router as symbols_router
-            app.include_router(symbols_router)
-            logger.info("Symbol router alternatif konumdan başarıyla eklendi")
-        except ImportError as e2:
-            logger.warning(f"Alternatif symbol router import edilemedi: {str(e2)}")
-    
-    # Tüm router'ları debug için göster
-    for route in app.routes:
-        logger.info(f"Endpoint: {route.path}, methods: {route.methods if hasattr(route, 'methods') else 'N/A'}")
+        logger.info("Auth router eklendi")
         
-except Exception as e:
-    logger.error(f"Router ekleme genel hatası: {str(e)}")
-    import traceback
-    logger.error(f"Tam hata: {traceback.format_exc()}")
+        app.include_router(users_router)
+        logger.info("Users router eklendi")
+        
+        app.include_router(crypto_router)
+        logger.info("Crypto router eklendi")
+        
+        app.include_router(symbols_router)
+        logger.info("Symbols router eklendi")
+        
+        logger.info("Router'lar başarıyla eklendi")
+    except Exception as e:
+        logger.error(f"Router ekleme hatası: {str(e)}")
+else:
+    logger.error("Router'lar içe aktarılamadığı için eklenemedi")
 
 @app.get("/", tags=["status"])
 async def root():
@@ -131,7 +112,7 @@ async def health_check():
 async def test_db():
     """Veritabanı bağlantısını test et"""
     try:
-        from app.database.base import engine
+        from backend.database.base import engine
         from sqlalchemy import text
         
         with engine.connect() as connection:
@@ -148,8 +129,8 @@ async def create_tables():
     """Veritabanı tablolarını oluştur"""
     try:
         # Modelleri import et
-        from app.models.crypto import Symbol
-        from app.database.base import Base, engine
+        from backend.models.crypto import Symbol
+        from backend.database.base import Base, engine
         
         # Tabloları oluştur
         Base.metadata.create_all(bind=engine)
@@ -185,4 +166,4 @@ if __name__ == "__main__":
     import uvicorn
     port = 8000
     logger.info(f"API başlatılıyor... http://localhost:{port}")
-    uvicorn.run("app.main:app", host="0.0.0.0", port=port, reload=True) 
+    uvicorn.run("backend.main:app", host="0.0.0.0", port=port, reload=True) 
