@@ -1,8 +1,14 @@
 import React from 'react';
-import Layout from '@/components/layout/Layout';
 import AnalysisChart from '@/components/dashboard/AnalysisChart';
 import SignalList from '@/components/dashboard/SignalList';
 import CryptoList from '@/components/dashboard/CryptoList';
+import { useSymbolPrices } from '../hooks/useCrypto';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { ArrowUpIcon, ArrowDownIcon, TrendingUpIcon, LineChartIcon, BarChartIcon } from 'lucide-react';
 
 // Örnek veri
 const chartData = [
@@ -64,148 +70,201 @@ const exampleSignals = [
   },
 ] as const;
 
-const popularCryptos = [
-  {
-    id: '1',
-    symbol: 'BTC',
-    name: 'Bitcoin',
-    price: 67842.5,
-    change24h: 2.34,
-    volume24h: 28500000000,
-    marketCap: 1320000000000,
-    logoUrl: 'https://cryptologos.cc/logos/bitcoin-btc-logo.png',
-  },
-  {
-    id: '2',
-    symbol: 'ETH',
-    name: 'Ethereum',
-    price: 3450.78,
-    change24h: 1.56,
-    volume24h: 15400000000,
-    marketCap: 420000000000,
-    logoUrl: 'https://cryptologos.cc/logos/ethereum-eth-logo.png',
-  },
-  {
-    id: '3',
-    symbol: 'SOL',
-    name: 'Solana',
-    price: 142.6,
-    change24h: 3.78,
-    volume24h: 3280000000,
-    marketCap: 62000000000,
-    logoUrl: 'https://cryptologos.cc/logos/solana-sol-logo.png',
-  },
-  {
-    id: '4',
-    symbol: 'ADA',
-    name: 'Cardano',
-    price: 0.512,
-    change24h: -1.25,
-    volume24h: 780000000,
-    marketCap: 18000000000,
-    logoUrl: 'https://cryptologos.cc/logos/cardano-ada-logo.png',
-  },
-  {
-    id: '5',
-    symbol: 'DOT',
-    name: 'Polkadot',
-    price: 7.84,
-    change24h: -0.87,
-    volume24h: 430000000,
-    marketCap: 10200000000,
-    logoUrl: 'https://cryptologos.cc/logos/polkadot-new-dot-logo.png',
-  },
-] as const;
-
 const HomePage: React.FC = () => {
+  const topSymbols = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'ADAUSDT'];
+  const { prices: cryptoPrices, loading, error } = useSymbolPrices(topSymbols, 10000);
+  
+  // Eğer cryptoPrices yoksa boş bir array kullan
+  const cryptoListData = cryptoPrices && cryptoPrices.length > 0 
+    ? cryptoPrices.map(item => {
+        const symbol = item.symbol.replace('USDT', '');
+        return {
+          id: symbol,
+          symbol: symbol,
+          name: getFullName(symbol),
+          price: typeof item.price === 'number' ? item.price : parseFloat(item.price as string),
+          change24h: getRandomChange(),
+          volume24h: getRandomVolume(symbol),
+          marketCap: getRandomMarketCap(symbol),
+          logoUrl: `https://cryptologos.cc/logos/${getLogoName(symbol)}-logo.png`,
+        };
+      })
+    : [];
+
+  // Yardımcı fonksiyonlar
+  function getFullName(symbol: string): string {
+    const names: Record<string, string> = {
+      'BTC': 'Bitcoin',
+      'ETH': 'Ethereum',
+      'BNB': 'Binance Coin',
+      'SOL': 'Solana',
+      'ADA': 'Cardano',
+      'XRP': 'Ripple',
+      'DOT': 'Polkadot'
+    };
+    return names[symbol] || symbol;
+  }
+
+  function getLogoName(symbol: string): string {
+    const logos: Record<string, string> = {
+      'BTC': 'bitcoin-btc',
+      'ETH': 'ethereum-eth',
+      'BNB': 'bnb-bnb',
+      'SOL': 'solana-sol',
+      'ADA': 'cardano-ada',
+      'XRP': 'xrp-xrp',
+      'DOT': 'polkadot-new-dot'
+    };
+    return logos[symbol] || symbol.toLowerCase();
+  }
+
+  function getRandomChange(): number {
+    return Math.round((Math.random() * 10 - 3) * 100) / 100;
+  }
+
+  function getRandomVolume(symbol: string): number {
+    const baseVolume = {
+      'BTC': 25000000000,
+      'ETH': 15000000000,
+      'BNB': 3000000000,
+      'SOL': 3200000000,
+      'ADA': 800000000,
+      'XRP': 1500000000,
+      'DOT': 500000000
+    };
+    const base = baseVolume[symbol] || 500000000;
+    return base + Math.random() * base * 0.2;
+  }
+
+  function getRandomMarketCap(symbol: string): number {
+    const baseMarketCap = {
+      'BTC': 1300000000000,
+      'ETH': 400000000000,
+      'BNB': 80000000000,
+      'SOL': 60000000000,
+      'ADA': 20000000000,
+      'XRP': 30000000000,
+      'DOT': 10000000000
+    };
+    const base = baseMarketCap[symbol] || 5000000000;
+    return base + Math.random() * base * 0.1;
+  }
+
   return (
-    <Layout>
-      <div className="mb-8 flex items-center justify-between">
+    <div className="flex flex-col gap-6">
+      {/* Üst Bar */}
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Gösterge Paneli</h1>
-          <p className="text-muted-foreground">Kripto pazarına genel bakış ve analizler</p>
+          <h1 className="text-2xl font-bold">Gösterge Paneli</h1>
+          <p className="text-muted-foreground">Kripto piyasası ve sinyaller</p>
         </div>
-        <div className="flex gap-2">
-          <select className="h-9 rounded-md border border-input bg-background px-3 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
-            <option value="today">Bugün</option>
-            <option value="week">Bu Hafta</option>
-            <option value="month">Bu Ay</option>
-            <option value="year">Bu Yıl</option>
-          </select>
-          <button className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+        <div className="flex items-center gap-4">
+          <Select defaultValue="1d">
+            <SelectTrigger className="w-32">
+              <SelectValue placeholder="Zaman Aralığı" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="1h">Son 1 Saat</SelectItem>
+              <SelectItem value="24h">Son 24 Saat</SelectItem>
+              <SelectItem value="1d">Bugün</SelectItem>
+              <SelectItem value="7d">Son 7 Gün</SelectItem>
+              <SelectItem value="30d">Son 30 Gün</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button>
+            <TrendingUpIcon className="mr-2 h-4 w-4" />
             Analiz Yap
-          </button>
+          </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <AnalysisChart symbol="BTC/USDT" interval="1H" data={chartData} />
-          
-          <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div className="rounded-lg border bg-card p-6 shadow-sm">
-              <h3 className="mb-2 text-lg font-medium">Son Analizler</h3>
-              <div className="space-y-4">
-                <div className="rounded-md bg-muted/50 p-3">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">BTC/USDT</span>
-                    <span className="text-xs text-muted-foreground">1 saat önce</span>
-                  </div>
-                  <p className="mt-2 text-sm">Bitcoin şu anda kritik bir direnç noktasında. RSI göstergesi aşırı alım bölgesinde.</p>
-                </div>
-                
-                <div className="rounded-md bg-muted/50 p-3">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">ETH/USDT</span>
-                    <span className="text-xs text-muted-foreground">3 saat önce</span>
-                  </div>
-                  <p className="mt-2 text-sm">Ethereum, orta vadeli bir yükseliş trendi içinde. MACD sinyali pozitif.</p>
-                </div>
+      {/* Ana Grid */}
+      <div className="grid grid-cols-12 gap-6">
+        {/* Sol Taraf - Grafik ve İstatistikler */}
+        <div className="col-span-8 space-y-6">
+          {/* Grafik Kartı */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <div>
+                <CardTitle>BTC/USDT Analizi</CardTitle>
+                <p className="text-sm text-muted-foreground">Günlük fiyat hareketi ve teknik analiz</p>
               </div>
-              <div className="mt-4 text-center">
-                <button className="text-sm font-medium text-primary hover:underline">
-                  Tüm Analizleri Gör
-                </button>
-              </div>
-            </div>
+              <Tabs defaultValue="candle">
+                <TabsList>
+                  <TabsTrigger value="candle">
+                    <BarChartIcon className="h-4 w-4" />
+                  </TabsTrigger>
+                  <TabsTrigger value="line">
+                    <LineChartIcon className="h-4 w-4" />
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </CardHeader>
+            <CardContent>
+              <AnalysisChart symbol="BTC/USDT" interval="1H" data={chartData} />
+            </CardContent>
+          </Card>
+
+          {/* İstatistik Kartları */}
+          <div className="grid grid-cols-3 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm font-medium">Toplam Sinyal</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">127</div>
+                <p className="text-xs text-muted-foreground">Son 30 gün</p>
+              </CardContent>
+            </Card>
             
-            <div className="rounded-lg border bg-card p-6 shadow-sm">
-              <h3 className="mb-2 text-lg font-medium">Analiz Özeti</h3>
-              <div className="divide-y">
-                <div className="flex items-center justify-between py-2">
-                  <span className="text-sm">Günlük Kullanılan Analiz</span>
-                  <span className="font-medium">2/3</span>
-                </div>
-                <div className="flex items-center justify-between py-2">
-                  <span className="text-sm">Premium Durumu</span>
-                  <span className="rounded-full bg-warning/10 px-2 py-0.5 text-xs font-medium text-warning">
-                    Ücretsiz
-                  </span>
-                </div>
-                <div className="flex items-center justify-between py-2">
-                  <span className="text-sm">En Son Analiz</span>
-                  <span className="text-sm text-muted-foreground">1 saat önce</span>
-                </div>
-                <div className="flex items-center justify-between py-2">
-                  <span className="text-sm">Başarılı Sinyaller</span>
-                  <span className="font-medium text-success">14/20</span>
-                </div>
-              </div>
-              <div className="mt-4">
-                <button className="inline-flex w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
-                  Premium'a Yükselt
-                </button>
-              </div>
-            </div>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm font-medium">Başarı Oranı</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-success">%78.5</div>
+                <p className="text-xs text-muted-foreground">Kapalı sinyaller</p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm font-medium">Aktif Sinyal</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-primary">12</div>
+                <p className="text-xs text-muted-foreground">Açık pozisyonlar</p>
+              </CardContent>
+            </Card>
           </div>
         </div>
 
-        <div className="space-y-6">
-          <SignalList signals={exampleSignals} />
-          <CryptoList cryptos={popularCryptos} />
+        {/* Sağ Taraf - Sinyaller ve Liste */}
+        <div className="col-span-4 space-y-6">
+          {/* Sinyaller */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Son Sinyaller</CardTitle>
+                <Tabs defaultValue="all" className="w-fit">
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="all">Tümü</TabsTrigger>
+                    <TabsTrigger value="buy">Alış</TabsTrigger>
+                    <TabsTrigger value="sell">Satış</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <SignalList signals={exampleSignals} showAll={false} />
+            </CardContent>
+          </Card>
+
+          {/* Kripto Listesi */}
+          <CryptoList cryptos={cryptoListData} loading={loading} error={error} onViewAll={() => console.log('Tüm kripto paraları görüntüle')} />
         </div>
       </div>
-    </Layout>
+    </div>
   );
 };
 

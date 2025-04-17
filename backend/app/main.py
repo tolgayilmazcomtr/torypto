@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import logging
@@ -57,52 +57,22 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 # Router'ları içe aktar ve ekle
 try:
-    # API rotalarını dene
-    try:
-        from app.api.routes.auth import router as auth_router
-        app.include_router(auth_router)
-        logger.info("Auth router başarıyla eklendi")
-    except ImportError as e:
-        logger.warning(f"Auth router import edilemedi: {str(e)}")
+    # API rotalarını ekleme
+    from app.api.routes.auth import router as auth_router
+    app.include_router(auth_router)
+    logger.info("Auth router başarıyla eklendi")
     
-    try:
-        from app.api.routes.users import router as users_router
-        app.include_router(users_router)
-        logger.info("Users router başarıyla eklendi")
-    except ImportError as e:
-        logger.warning(f"Users router import edilemedi: {str(e)}")
+    from app.api.routes.users import router as users_router
+    app.include_router(users_router)
+    logger.info("Users router başarıyla eklendi")
     
-    # API ve app rotalarının her ikisini de ekleyeceğiz
-    # İlk olarak API rotasını dene (prefix: /api/crypto)
-    try:
-        from app.api.routes.crypto import router as api_crypto_router
-        app.include_router(api_crypto_router)
-        logger.info("API Crypto router başarıyla eklendi")
-    except ImportError as e:
-        logger.warning(f"API Crypto router import edilemedi: {str(e)}")
+    from app.api.routes.crypto import router as crypto_router
+    app.include_router(crypto_router)
+    logger.info("Crypto router başarıyla eklendi")
     
-    # İkinci olarak app rotasını dene (prefix: /crypto)
-    try:
-        from app.routers.crypto import router as app_crypto_router
-        app.include_router(app_crypto_router)
-        logger.info("App Crypto router başarıyla eklendi")
-    except ImportError as e:
-        logger.warning(f"App Crypto router import edilemedi: {str(e)}")
-    
-    # Sembol rotalarını dene
-    try:
-        from app.routers.symbols import router as symbols_router
-        app.include_router(symbols_router)
-        logger.info("Symbol router başarıyla eklendi")
-    except ImportError as e:
-        logger.warning(f"Symbol router import edilemedi: {str(e)}")
-        # Alternatif konumu dene
-        try:
-            from app.api.routes.symbols import router as symbols_router
-            app.include_router(symbols_router)
-            logger.info("Symbol router alternatif konumdan başarıyla eklendi")
-        except ImportError as e2:
-            logger.warning(f"Alternatif symbol router import edilemedi: {str(e2)}")
+    from app.api.routes.signals import router as signals_router
+    app.include_router(signals_router)
+    logger.info("Signals router başarıyla eklendi")
     
     # Tüm router'ları debug için göster
     for route in app.routes:

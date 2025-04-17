@@ -15,6 +15,7 @@
     "build:backend": "cd backend && echo \"No build step for Python backend\""
   },
   "dependencies": {
+    "@radix-ui/react-switch": "^1.1.4",
     "concurrently": "^8.2.2",
     "open": "^10.1.1"
   },

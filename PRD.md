@@ -9,6 +9,7 @@ Torypto, yapay zeka destekli kripto para analizi ve sinyal üretimi yapan, kulla
 - Orta düzey kripto yatırımcıları
 - Teknik analiz bilmeyen kullanıcılar
 - Sinyal grupları ve eğitmenler
+- Platform yöneticileri ve moderatörler
 
 ## Temel Özellikler
 
@@ -43,6 +44,42 @@ Torypto, yapay zeka destekli kripto para analizi ve sinyal üretimi yapan, kulla
 - Otomatik analiz raporları (premium)
 - WooCommerce ile ödeme altyapısı
 
+### 6. Admin Paneli
+#### 6.1 Kullanıcı Yönetimi
+- Kullanıcı listesi ve detaylı arama
+- Kullanıcı profil düzenleme ve hesap durumu kontrolü
+- Rol tabanlı yetkilendirme (admin, moderatör, kullanıcı)
+- Manuel abonelik yönetimi
+- Kullanıcı aktivite logları
+
+#### 6.2 Abonelik ve Ödeme Yönetimi
+- Abonelik planları yönetimi
+- Ödeme geçmişi ve raporlama
+- İade ve iptal işlemleri
+- Gelir analizi ve grafikler
+- WooCommerce entegrasyon ayarları
+
+#### 6.3 İçerik ve Sinyal Yönetimi
+- Sinyal onay/red mekanizması
+- Manuel sinyal oluşturma
+- Sinyal performans takibi
+- Duyuru ve blog yönetimi
+- Yardım dokümanları yönetimi
+
+#### 6.4 Sistem Yönetimi
+- API bağlantı durumu izleme
+- Sistem performans metrikleri
+- Hata logları takibi
+- AI servis kullanım istatistikleri
+- Güvenlik ayarları ve erişim logları
+
+#### 6.5 Analitik ve Raporlama
+- Kullanıcı büyüme metrikleri
+- Sinyal başarı oranları
+- Platform kullanım istatistikleri
+- Gelir ve abonelik analizleri
+- Özelleştirilebilir raporlar
+
 ## Teknoloji Yığını
 
 - **Frontend**: Next.js + TypeScript + Tailwind CSS
@@ -52,6 +89,7 @@ Torypto, yapay zeka destekli kripto para analizi ve sinyal üretimi yapan, kulla
 - **Veri Kaynağı**: Binance REST API
 - **Grafik Araçları**: TradingView / Lightweight Charts
 - **Ödeme**: WooCommerce (WordPress) API entegrasyonu
+- **Admin Panel**: Next.js (Dashboard UI) + Recharts (Grafikler)
 
 ## Yapılacaklar
 
@@ -91,14 +129,22 @@ Torypto, yapay zeka destekli kripto para analizi ve sinyal üretimi yapan, kulla
 - [ ] Freemium limit kontrolü
 - [ ] Bildirim sistemi
 
-### Faz 6: Test ve Optimizasyon (Hedef: 2 Hafta)
+### Faz 6: Admin Paneli Geliştirme (Hedef: 4 Hafta)
+- [ ] Admin dashboard tasarımı
+- [ ] Kullanıcı yönetim modülü
+- [ ] Abonelik ve ödeme yönetimi
+- [ ] İçerik ve sinyal yönetimi
+- [ ] Analitik ve raporlama sistemi
+- [ ] Sistem izleme araçları
+
+### Faz 7: Test ve Optimizasyon (Hedef: 2 Hafta)
 - [ ] Performans testleri
 - [ ] Güvenlik testleri
 - [ ] Yük testleri
 - [ ] UI/UX testleri
 - [ ] Hata düzeltmeleri
 
-### Faz 7: Lansman Hazırlıkları (Hedef: 2 Hafta)
+### Faz 8: Lansman Hazırlıkları (Hedef: 2 Hafta)
 - [ ] Dokümantasyon tamamlama
 - [ ] Kullanıcı kılavuzu
 - [ ] Beta testleri
@@ -122,8 +168,9 @@ Torypto, yapay zeka destekli kripto para analizi ve sinyal üretimi yapan, kulla
 | AI Entegrasyonu | Hafta 10 | Planlandı |
 | Frontend MVP | Hafta 15 | Planlandı |
 | Premium Özellikler | Hafta 18 | Planlandı |
-| Beta Sürüm | Hafta 20 | Planlandı |
-| Ürün Lansmanı | Hafta 22 | Planlandı |
+| Admin Paneli | Hafta 22 | Planlandı |
+| Beta Sürüm | Hafta 24 | Planlandı |
+| Ürün Lansmanı | Hafta 26 | Planlandı |
 
 ## Risk Analizi
 
@@ -134,6 +181,7 @@ Torypto, yapay zeka destekli kripto para analizi ve sinyal üretimi yapan, kulla
 | Piyasa değişkenliği | Orta | Yüksek | Algoritma ayarlamaları ve uyarı sistemi |
 | Ölçeklenebilirlik sorunları | Yüksek | Düşük | Mikroservis mimarisi ve yük testi |
 | Güvenlik ihlalleri | Çok Yüksek | Düşük | Güvenlik taramaları ve audit |
+| Admin yetki suistimali | Yüksek | Düşük | Detaylı log tutma ve yetki sınırlaması |
 
 ## Gelecek Geliştirmeler (v2.0)
 
@@ -142,5 +190,8 @@ Torypto, yapay zeka destekli kripto para analizi ve sinyal üretimi yapan, kulla
 - Sosyal paylaşım özellikleri
 - Otomatik trade botları ile entegrasyon
 - Daha fazla borsa desteği
+- Gelişmiş admin analitik araçları
+- Multi-dil desteği
+- API marketplace
 
 Bu doküman, proje ilerledikçe güncellenecektir. 
