@@ -74,6 +74,10 @@ try:
     app.include_router(signals_router)
     logger.info("Signals router başarıyla eklendi")
     
+    from app.api.routes.symbols import router as symbols_router
+    app.include_router(symbols_router)
+    logger.info("Symbols router başarıyla eklendi")
+    
     # Tüm router'ları debug için göster
     for route in app.routes:
         logger.info(f"Endpoint: {route.path}, methods: {route.methods if hasattr(route, 'methods') else 'N/A'}")

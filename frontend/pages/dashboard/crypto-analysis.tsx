@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import cryptoService, { CryptoSymbol, AnalysisResult } from '@/services/cryptoService';
 import { BarChart, LineChart, PieChart } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import { Label } from '@/components/ui/label';
 
 // ChartJS dinamik olarak yükleniyor (SSR uyumluluğu için)
 const CandlestickChart = dynamic(() => import('@/components/charts/CandlestickChart'), {
@@ -34,8 +35,11 @@ export default function CryptoAnalysisPage() {
   useEffect(() => {
     const loadSymbols = async () => {
       try {
-        const data = await cryptoService.getSymbols();
+        const data = await cryptoService.getSymbolsWithIcons();
         setSymbols(data);
+        if (data.length > 0 && !selectedSymbol) {
+          setSelectedSymbol(data[0].symbol);
+        }
       } catch (error) {
         console.error('Semboller yüklenirken hata oluştu:', error);
       }
@@ -55,24 +59,46 @@ export default function CryptoAnalysisPage() {
   const performAnalysis = async () => {
     setLoading(true);
     try {
+      console.log("Analiz başlatılıyor: Symbol=", selectedSymbol, "Interval=", interval);
+      
       // Kline verilerini al
-      const klineData = await cryptoService.getKlines(selectedSymbol, interval, 100, true);
-      setChartData(
-        klineData.map((item) => ({
-          time: new Date(item.open_time).getTime() / 1000,
-          open: item.open,
-          high: item.high,
-          low: item.low,
-          close: item.close,
-          volume: item.volume,
-        }))
-      );
+      try {
+        const klineData = await cryptoService.getKlines(selectedSymbol, interval, 100, true);
+        console.log("Kline verisi:", klineData);
+        
+        if (klineData && klineData.length > 0) {
+          setChartData(
+            klineData.map((item) => ({
+              time: new Date(item.open_time).getTime() / 1000,
+              open: item.open,
+              high: item.high,
+              low: item.low,
+              close: item.close,
+              volume: item.volume,
+            }))
+          );
+        } else {
+          console.error("Kline verisi boş veya geçersiz:", klineData);
+          setChartData([]);
+        }
+      } catch (klineError) {
+        console.error("Kline verileri alınırken hata:", klineError);
+        setChartData([]);
+      }
 
       // Analiz verilerini al
-      const analysisData = await cryptoService.getAnalysis(selectedSymbol, interval);
-      setAnalysis(analysisData);
+      try {
+        const analysisData = await cryptoService.getAnalysis(selectedSymbol, interval);
+        console.log("Analiz verisi:", analysisData);
+        setAnalysis(analysisData);
+      } catch (analysisError) {
+        console.error("Analiz verileri alınırken hata:", analysisError);
+        setAnalysis(null);
+      }
     } catch (error) {
-      console.error('Analiz yapılırken hata oluştu:', error);
+      console.error('Analiz yapılırken genel hata oluştu:', error);
+      setAnalysis(null);
+      setChartData([]);
     } finally {
       setLoading(false);
     }
@@ -111,15 +137,28 @@ export default function CryptoAnalysisPage() {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Kripto Para</label>
-                <Select value={selectedSymbol} onValueChange={setSelectedSymbol}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sembol seçin" />
+                <Label htmlFor="symbol">Kripto Para</Label>
+                <Select
+                  value={selectedSymbol}
+                  onValueChange={setSelectedSymbol}
+                >
+                  <SelectTrigger id="symbol">
+                    <SelectValue placeholder="Bir kripto para seçin" />
                   </SelectTrigger>
                   <SelectContent>
                     {symbols.map((symbol) => (
-                      <SelectItem key={symbol.symbol} value={symbol.symbol}>
-                        {symbol.symbol} ({symbol.baseAsset})
+                      <SelectItem key={symbol.symbol} value={symbol.symbol} className="flex items-center">
+                        <div className="flex items-center">
+                          <img 
+                            src={symbol.iconUrl} 
+                            alt={symbol.baseAsset}
+                            className="mr-2 h-5 w-5"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = `https://cryptoicons.org/api/icon/${symbol.baseAsset.toLowerCase()}/32`;
+                            }}
+                          />
+                          {symbol.baseAsset}/{symbol.quoteAsset}
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>

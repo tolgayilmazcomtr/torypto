@@ -580,4 +580,34 @@ async def websocket_endpoint(websocket: WebSocket, symbol: str):
         
         # WebSocket listesinden çıkar
         if websocket in active_connections.get(stream_name, []):
-            active_connections[stream_name].remove(websocket) 
+            active_connections[stream_name].remove(websocket)
+
+@router.get("/symbols-with-icons", response_model=List[Dict[str, Any]])
+async def get_symbols_with_icons(
+    limit: int = Query(100, description="Alınacak sembol sayısı", ge=1, le=1000)
+):
+    """
+    İkonları içeren kripto para sembollerini alır. Frontend için özelleştirilmiş.
+    """
+    try:
+        # Binance'den sembolleri al
+        symbols = await binance_service.get_symbols_info()
+        
+        # Sembolleri işle ve icon URL ekle
+        result = []
+        for symbol in symbols[:limit]:
+            # Token adı (BTC, ETH gibi) - ikonlar için gerekli
+            base_asset = symbol["baseAsset"].lower()
+            
+            result.append({
+                "symbol": symbol["symbol"],
+                "baseAsset": symbol["baseAsset"],
+                "quoteAsset": symbol["quoteAsset"],
+                "status": symbol["status"],
+                "iconUrl": f"https://cryptoicons.org/api/icon/{base_asset}/64"
+            })
+        
+        return result
+    except Exception as e:
+        logger.error(f"Semboller alınırken hata: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Semboller alınamadı: {str(e)}") 

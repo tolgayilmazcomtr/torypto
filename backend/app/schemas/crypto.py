@@ -1,7 +1,8 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 from enum import Enum
+from decimal import Decimal
 
 
 class IntervalEnum(str, Enum):
@@ -23,39 +24,87 @@ class IntervalEnum(str, Enum):
     MONTH_1 = "1M"
 
 
-class Symbol(BaseModel):
+class SymbolBase(BaseModel):
+    """Kripto sembol temel veri modeli"""
     symbol: str
-    base_asset: str  # Örn: BTC
-    quote_asset: str  # Örn: USDT
-    name: str | None = None
-    icon_url: str | None = None
-    is_active: bool = True
-    created_at: datetime | None = None
-    updated_at: datetime | None = None
+    base_asset: str
+    quote_asset: str
+    status: str = "TRADING"
+    icon_url: Optional[str] = None
+
+
+class SymbolCreate(SymbolBase):
+    """Sembol oluşturma modeli"""
+    pass
+
+
+class SymbolUpdate(BaseModel):
+    """Sembol güncelleme modeli"""
+    base_asset: Optional[str] = None
+    quote_asset: Optional[str] = None
+    status: Optional[str] = None
+    icon_url: Optional[str] = None
+    price: Optional[float] = None
+    price_change: Optional[float] = None
+    price_change_percent: Optional[float] = None
+    volume: Optional[float] = None
+    high_price: Optional[float] = None
+    low_price: Optional[float] = None
+    is_featured: Optional[bool] = None
+    rank: Optional[int] = None
+
+
+class Symbol(SymbolBase):
+    """Sembol tam veri modeli"""
+    id: int
+    price: Optional[float] = None
+    price_change: Optional[float] = None
+    price_change_percent: Optional[float] = None
+    volume: Optional[float] = None
+    high_price: Optional[float] = None
+    low_price: Optional[float] = None
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    is_featured: bool = False
+    rank: Optional[int] = None
 
     class Config:
         from_attributes = True
 
 
+class SymbolList(BaseModel):
+    """Sembol listesi yanıt modeli"""
+    items: List[Symbol]
+    total: int
+
+
 class SymbolPrice(BaseModel):
-    """Sembol fiyat bilgisi"""
+    """Sembol fiyat bilgisi modeli"""
     symbol: str
     price: float
 
 
 class KlineData(BaseModel):
-    """Kline (mum) veri formatı"""
-    open_time: datetime
+    """Mum grafiği verisi modeli"""
+    open_time: int
     open: float
     high: float
     low: float
     close: float
     volume: float
-    close_time: datetime
-    quote_volume: float
-    trades: int
-    taker_buy_base: float
-    taker_buy_quote: float
+    close_time: int
+    quote_asset_volume: float
+    number_of_trades: int
+    taker_buy_base_asset_volume: float
+    taker_buy_quote_asset_volume: float
+
+    @field_validator('open', 'high', 'low', 'close', 'volume', 'quote_asset_volume', 
+                 'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume', mode='before')
+    @classmethod
+    def ensure_float(cls, v):
+        if isinstance(v, str):
+            return float(v)
+        return v
 
 
 class SymbolDetail(BaseModel):
@@ -113,4 +162,12 @@ class SimpleTicker(BaseModel):
     volume_24h: float
     quote_volume_24h: float
     price_change_24h: float
-    price_change_percent_24h: float 
+    price_change_percent_24h: float
+
+
+class SyncSymbolsResult(BaseModel):
+    """Sembol senkronizasyon sonucu"""
+    total: int
+    created: int
+    updated: int
+    errors: int 

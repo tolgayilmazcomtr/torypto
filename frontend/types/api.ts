@@ -1,8 +1,9 @@
 // API yanıt tipleri
-export interface ApiResponse<T> {
-  data: T;
-  status?: string;
+export interface ApiResponse<T = any> {
+  success: boolean;
   message?: string;
+  data?: T;
+  status?: string;
 }
 
 // Kimlik doğrulama tipleri
@@ -58,6 +59,7 @@ export interface GetKlinesParams {
   limit?: number;
   start_time?: number;
   end_time?: number;
+  add_indicators?: boolean;
 }
 
 export interface GetPricesParams {
@@ -80,8 +82,12 @@ export interface User {
   lastLogin: string;
 }
 
-export interface ApiResponse {
-  success: boolean;
-  message?: string;
-  data?: any;
-} 
+export type CryptoSymbol = {
+  symbol: string;
+  baseAsset: string;
+  quoteAsset: string;
+  status?: string;
+  price?: number;
+  priceChangePercent?: number;
+  iconUrl?: string;
+}; 
