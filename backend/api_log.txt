@@ -1,0 +1,8 @@
+INFO:     Will watch for changes in these directories: ['/Users/tolgayilmaz/Documents/GitHub/torypto/backend']
+ERROR:    [Errno 48] Address already in use
+Çalışma dizini: /Users/tolgayilmaz/Documents/GitHub/torypto/backend
+Modül yolları:
+Python path: ['/Users/tolgayilmaz/Documents/GitHub/torypto/backend', '/Users/tolgayilmaz/Documents/GitHub/torypto', '/Users/tolgayilmaz/Documents/GitHub/torypto/backend', '/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Users/tolgayilmaz/Documents/GitHub/torypto/venv/lib/python3.13/site-packages']
+app.main:app modülünü deniyorum...
+Uvicorn modülü başarıyla import edildi
+API http://localhost:8001 adresinde başlatılıyor...

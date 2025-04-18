@@ -64,6 +64,12 @@ class TechnicalIndicators:
         
         return result_df
     
+    # Uyumluluk için metot isimleri
+    @staticmethod
+    def add_all_indicators(df: pd.DataFrame) -> pd.DataFrame:
+        """calculate_indicators metodunun diğer adı - crypto.py için uyumluluk"""
+        return TechnicalIndicators.calculate_indicators(df)
+    
     @staticmethod
     def analyze_trend(df: pd.DataFrame) -> Dict[str, Any]:
         """
@@ -175,6 +181,115 @@ class TechnicalIndicators:
         
         return trend
     
+    # Uyumluluk için metot isimleri
+    @staticmethod
+    def get_trend(df: pd.DataFrame) -> Dict[str, Any]:
+        """analyze_trend metodunun diğer adı - crypto.py için uyumluluk"""
+        return TechnicalIndicators.analyze_trend(df)
+    
+    @staticmethod
+    def get_signals(df: pd.DataFrame) -> Dict[str, str]:
+        """
+        Alım-satım sinyallerini döndürür - crypto.py için uyumluluk
+        """
+        last_row = df.iloc[-1]
+        prev_row = df.iloc[-2] if len(df) > 1 else None
+        
+        signals = {
+            "overall": "Nötr",
+            "ma": "Nötr",
+            "macd": "Nötr", 
+            "rsi": "Nötr",
+            "stoch": "Nötr",
+            "bollinger": "Nötr"
+        }
+        
+        # Trend analizi sonuçlarını al
+        trend_analysis = TechnicalIndicators.analyze_trend(df)
+        signals["overall"] = trend_analysis["trend"]
+        
+        # MA sinyali
+        if last_row['close'] > last_row['sma_20'] and last_row['sma_20'] > last_row['sma_50']:
+            signals["ma"] = "Güçlü Al"
+        elif last_row['close'] > last_row['sma_20']:
+            signals["ma"] = "Al"
+        elif last_row['close'] < last_row['sma_20'] and last_row['sma_20'] < last_row['sma_50']:
+            signals["ma"] = "Güçlü Sat"
+        elif last_row['close'] < last_row['sma_20']:
+            signals["ma"] = "Sat"
+            
+        # MACD sinyali
+        if last_row['macd'] > last_row['macd_signal'] and last_row['macd'] > 0:
+            signals["macd"] = "Al"
+        elif last_row['macd'] < last_row['macd_signal'] and last_row['macd'] < 0:
+            signals["macd"] = "Sat"
+        elif last_row['macd'] > last_row['macd_signal']:
+            signals["macd"] = "Nötr/Al"
+        else:
+            signals["macd"] = "Nötr/Sat"
+            
+        # RSI sinyali
+        if last_row['rsi_14'] > 70:
+            signals["rsi"] = "Aşırı Alım (Sat)"
+        elif last_row['rsi_14'] < 30:
+            signals["rsi"] = "Aşırı Satım (Al)"
+        elif last_row['rsi_14'] > 50:
+            signals["rsi"] = "Nötr/Yükseliş"
+        else:
+            signals["rsi"] = "Nötr/Düşüş"
+        
+        # Stochastic sinyali
+        if last_row['stoch_k'] > 80 and last_row['stoch_d'] > 80:
+            signals["stoch"] = "Aşırı Alım (Sat)"
+        elif last_row['stoch_k'] < 20 and last_row['stoch_d'] < 20:
+            signals["stoch"] = "Aşırı Satım (Al)"
+        elif last_row['stoch_k'] > last_row['stoch_d']:
+            signals["stoch"] = "Nötr/Yükseliş"
+        else:
+            signals["stoch"] = "Nötr/Düşüş"
+            
+        # Bollinger Bands sinyali
+        if last_row['close'] > last_row['bollinger_upper']:
+            signals["bollinger"] = "Aşırı Alım (Sat)"
+        elif last_row['close'] < last_row['bollinger_lower']:
+            signals["bollinger"] = "Aşırı Satım (Al)"
+        elif last_row['close'] > last_row['bollinger_middle']:
+            signals["bollinger"] = "Nötr/Yükseliş"
+        else:
+            signals["bollinger"] = "Nötr/Düşüş"
+            
+        return signals
+    
+    @staticmethod
+    def identify_support_resistance(df: pd.DataFrame, window: int = 10) -> Dict[str, List[float]]:
+        """
+        Destek ve direnç seviyelerini belirler - crypto.py için uyumluluk
+        """
+        # Son satır
+        last_close = df['close'].iloc[-1]
+        
+        # Minimum ve maksimum değerler
+        highs = df['high'].rolling(window=window, center=True).max()
+        lows = df['low'].rolling(window=window, center=True).min()
+        
+        # NaN değerleri kaldır
+        highs = highs.dropna()
+        lows = lows.dropna()
+        
+        # Son 100 veri noktası içindeki önemli seviyeler
+        recent_highs = highs.tail(100).sort_values(ascending=False).unique()[:3]
+        recent_lows = lows.tail(100).sort_values().unique()[:3]
+        
+        # Mevcut fiyata göre direnç ve destek seviyeleri
+        resistance_levels = [level for level in recent_highs if level > last_close]
+        support_levels = [level for level in recent_lows if level < last_close]
+        
+        # Sonuç
+        return {
+            "support": support_levels.tolist() if hasattr(support_levels, 'tolist') else list(support_levels),
+            "resistance": resistance_levels.tolist() if hasattr(resistance_levels, 'tolist') else list(resistance_levels)
+        }
+    
     @staticmethod
     def sma(series: pd.Series, period: int) -> pd.Series:
         """Basit Hareketli Ortalama (SMA) hesaplar"""
@@ -256,20 +371,17 @@ class TechnicalIndicators:
         """
         Stokastik Osilatör hesaplar
         
-        Args:
-            df: OHLCV DataFrame'i
-            
         Returns:
-            Dict: %K ve %D değerlerini içeren sözlük
+            Dict: k ve d değerlerini içeren sözlük
         """
-        # En yüksek ve en düşük fiyatlar
+        # Belirlenen periyot içindeki en yüksek ve en düşük değerler
         low_min = df['low'].rolling(window=k_period).min()
         high_max = df['high'].rolling(window=k_period).max()
         
-        # %K hesaplama
+        # %K hesaplama: (Güncel Kapanış - En Düşük) / (En Yüksek - En Düşük) * 100
         k = 100 * ((df['close'] - low_min) / (high_max - low_min))
         
-        # %D hesaplama (SMA of %K)
+        # %D hesaplama: %K'nın d_period üzerinden SMA'sı
         d = k.rolling(window=d_period).mean()
         
         return {
@@ -279,15 +391,20 @@ class TechnicalIndicators:
     
     @staticmethod
     def atr(df: pd.DataFrame, period: int = 14) -> pd.Series:
-        """Ortalama Gerçek Aralık (ATR) hesaplar"""
+        """
+        Ortalama Gerçek Aralık (ATR) hesaplar
+        
+        Returns:
+            pd.Series: ATR değerleri
+        """
         high = df['high']
         low = df['low']
         close = df['close']
         
-        # Gerçek aralık hesaplama
+        # Gerçek Aralık hesaplama
         tr1 = high - low
-        tr2 = abs(high - close.shift())
-        tr3 = abs(low - close.shift())
+        tr2 = (high - close.shift()).abs()
+        tr3 = (low - close.shift()).abs()
         
         tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
         
@@ -298,11 +415,17 @@ class TechnicalIndicators:
     
     @staticmethod
     def obv(df: pd.DataFrame) -> pd.Series:
-        """Bir Dengeli Hacim (OBV) hesaplar"""
+        """
+        On-Balance Volume (OBV) hesaplar
+        
+        Returns:
+            pd.Series: OBV değerleri
+        """
         close = df['close']
         volume = df['volume']
         
-        obv = pd.Series(0, index=close.index)
+        obv = pd.Series(index=df.index)
+        obv.iloc[0] = 0
         
         for i in range(1, len(close)):
             if close.iloc[i] > close.iloc[i-1]:
@@ -311,5 +434,5 @@ class TechnicalIndicators:
                 obv.iloc[i] = obv.iloc[i-1] - volume.iloc[i]
             else:
                 obv.iloc[i] = obv.iloc[i-1]
-        
+                
         return obv 

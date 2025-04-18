@@ -2,12 +2,12 @@ from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import List, Dict, Any, Optional
 import asyncio
 
-from ...services.binance_service import BinanceService
-from ...utils.technical_indicators import TechnicalIndicators
+from services.binance_service import BinanceService
+from utils.technical_indicators import TechnicalIndicators
 
 router = APIRouter(
     prefix="/technical",
-    tags=["technical-analysis"],
+    tags=["Teknik Analiz"],
     responses={404: {"description": "Bulunamadı"}},
 )
 

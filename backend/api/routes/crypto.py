@@ -4,10 +4,10 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 
-from backend.services.binance_service import BinanceService
-from backend.technical_analysis.indicators import TechnicalIndicators
+from services.binance_service import BinanceService
+from utils.technical_indicators import TechnicalIndicators
 
-router = APIRouter(prefix="/crypto", tags=["crypto"])
+router = APIRouter(prefix="/crypto", tags=["Kripto"])
 binance_service = BinanceService()
 
 @router.get("/symbols")

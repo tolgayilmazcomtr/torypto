@@ -1,3 +1,0 @@
-"""
-API router modülleri
-""" 

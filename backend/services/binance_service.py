@@ -154,4 +154,40 @@ class BinanceService:
             if symbol["quoteAsset"] == "USDT" and symbol["status"] == "TRADING"
         ]
         
-        return usdt_symbols 
+        return usdt_symbols
+        
+    # Crypto.py tarafından kullanılan ek metotlar
+    async def get_all_symbols(self) -> List[str]:
+        """
+        Tüm kripto para sembollerini döndürür
+        
+        Returns:
+            List[str]: Kripto para sembollerinin listesi
+        """
+        exchange_info = await self.get_exchange_info()
+        symbols = [
+            symbol["symbol"] 
+            for symbol in exchange_info["symbols"]
+            if symbol["quoteAsset"] == "USDT" and symbol["status"] == "TRADING"
+        ]
+        return symbols
+        
+    async def get_price(self, symbol: str) -> float:
+        """
+        Belirli bir sembolün güncel fiyatını döndürür
+        
+        Args:
+            symbol: Kripto para sembolü (örn. "BTCUSDT")
+            
+        Returns:
+            float: Sembolün güncel fiyatı
+        """
+        endpoint = "/api/v3/ticker/price"
+        params = {"symbol": symbol.upper()}
+        
+        async with httpx.AsyncClient(timeout=self.timeout) as client:
+            response = await client.get(f"{self.base_url}{endpoint}", params=params)
+            response.raise_for_status()
+            
+            data = response.json()
+            return float(data["price"]) 
