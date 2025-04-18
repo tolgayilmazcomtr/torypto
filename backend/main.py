@@ -31,7 +31,8 @@ app = FastAPI(
         {"name": "Teknik Analiz", "description": "Teknik analiz işlemleri"},
         {"name": "status", "description": "API durum kontrolleri"},
         {"name": "admin", "description": "Yönetici işlemleri"},
-        {"name": "docs", "description": "API dokümantasyon bilgileri"}
+        {"name": "docs", "description": "API dokümantasyon bilgileri"},
+        {"name": "WebSocket", "description": "Gerçek zamanlı kripto para verileri ve göstergeleri"}
     ]
 )
 
@@ -75,6 +76,10 @@ try:
     from api.routes.symbols import router as symbols_router
     app.include_router(symbols_router)
     logger.info("Symbols router başarıyla eklendi")
+    
+    from api.routes.websocket import router as websocket_router
+    app.include_router(websocket_router)
+    logger.info("WebSocket router başarıyla eklendi")
     
     # Tüm router'ları debug için göster
     for route in app.routes:
